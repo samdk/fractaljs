@@ -1,6 +1,6 @@
 $(function() {
 	$("#button").live("click",refresh);
-}
+});
 
 function refresh() {
 	var canvas = document.getElementById('c'),
@@ -27,4 +27,4 @@ function refresh() {
 		ctx.putImageData(canvasData,0,0);
 	}
 	draw();
-})
+}
