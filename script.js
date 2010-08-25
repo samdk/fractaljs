@@ -167,9 +167,15 @@ function refresh(triangles,quality) {
 	worker.onmessage = function(e) {
 		drawFractal(e.data);
 	}
+	console.log("starting worker");
 	worker.postMessage([triangles,quality,canvas.width,canvas.height]);
+	console.log("started worker");
 
 	function drawFractal(grid) {
+		var canvas = document.getElementById('c'),
+			ctx = canvas.getContext('2d'),
+			canvasData = ctx.createImageData(canvas.width, canvas.height),
+			cd = canvasData.data;
 		var freqMax = -1;
 		for (var x = 0; x < grid.length; x++) {
 			for (var y = 0; y < grid[x].length; y++) {
@@ -193,7 +199,7 @@ function refresh(triangles,quality) {
 			}
 		}
 		ctx.putImageData(canvasData,0,0);
+		drawColors();
 	}
-	drawColors();
 	return false;
 }
