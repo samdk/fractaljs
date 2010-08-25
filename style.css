@@ -10,7 +10,7 @@ canvas {
 	border: 1px solid #ddd;
 	background: black;
 }
-a {
+a#button {
 	display: block;
 	background: white;
 	padding: 10px 20px;
@@ -19,9 +19,9 @@ a {
 	width: 40px;
 	text-align: center;
 }
-a:hover {
+a#button:hover {
 	background: #ccc;
 }
-a:active {
+a#button:active {
 	padding: 11px 20px 9px;
 }
