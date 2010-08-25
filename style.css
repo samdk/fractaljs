@@ -3,10 +3,13 @@ body {
 	color: white;
 }
 canvas {
-	margin: 200px auto 0;
+	margin: 5px auto;
 	display: block;
+	background: black;
+}
+#c {
+	margin-top: 100px;
 	padding: 10px;
-	background: white;
 }
 a {
 	display: block;
@@ -16,4 +19,10 @@ a {
 	margin: 10px auto;
 	width: 40px;
 	text-align: center;
+}
+a:hover {
+	background: #ccc;
+}
+a:active {
+	padding: 11px 20px 9px;
 }
