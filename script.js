@@ -17,6 +17,7 @@ $(function() {
 		}
 		if (triangles.length == 2) triangles.push([[150,150],[0,75],[75,0]]);
 	});
+	$('#button').click(function(){refresh(triangles,100)});
 });
 
 function copy(triangles) {
