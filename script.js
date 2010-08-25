@@ -1,6 +1,107 @@
 $(function() {
 	$("#button").live("click",refresh);
+	render();
 });
+
+
+/* dragging */
+
+function render() {
+	var c = $('#c3'),
+		cvs = document.getElementById('c3'),
+		context = cvs.getContext('2d'),
+		triangles = [[[10,10],[50,0],[0,50]],
+					 [[40,40],[30,20],[40,70]],
+					 [[100,100],[50,50],[50,0]],
+					 [[150,10],[10,50],[50,0]],
+					 [[10,150],[50,0],[0,60]]],
+		colors = [["f00","f88"],["0f0","8f8"],["66f","aaf"],["ff0","ff8"],["0ff","8ff"]],
+		selectedTriangle = null,
+		selectedPoint = null,
+		canMove = false,
+		offset = [0,0],
+		x = 0,
+		y = 0;
+	setInterval(draw,5);
+	function draw(pX,pY) {
+		context.clearRect(0,0,300,300);
+		context.fillStyle = "#ccc";
+		for (var n = 0; n < 5; n++) {
+			context.fillRect((cvs.width-1) / 4 * n,0,1,cvs.height);
+			context.fillRect(0,(cvs.height-1) / 4 * n,cvs.width,1);
+		}
+		for (var i = 0; i < triangles.length; i++) {
+			context.beginPath();
+			context.lineWidth = 2;
+			context.strokeStyle = '#777';
+			context.fillStyle = '#'+colors[i][0];
+			var pts = triangles[i];
+			context.moveTo(pts[0][0],pts[0][1]);
+			context.lineTo(pts[1][0]+pts[0][0],pts[1][1]+pts[0][1]);
+			context.lineTo(pts[2][0]+pts[0][0],pts[2][1]+pts[0][1]);
+			context.lineTo(pts[0][0],pts[0][1]);
+			if (pX && pY && context.isPointInPath(pX,pY)) {
+				selectedTriangle = i;
+				offset[0] = pX - pts[0][0];
+				offset[1] = pY - pts[0][1];
+				selectedPoint = null;
+			} else if (pX && pY && selectedTriangle === i) selectedTriangle = null;
+			if (selectedTriangle === i) {
+				context.fillStyle = '#'+colors[i][1];
+				context.strokeStyle = '#000';
+			}
+			context.fill();
+			context.stroke();
+			context.closePath();
+			context.fillStyle = '#000';
+			context.beginPath();
+			context.arc(pts[1][0]+pts[0][0],pts[1][1]+pts[0][1],3,0,Math.PI*2);
+			if (pX && pY && context.isPointInPath(pX,pY)) {
+				selectedTriangle = i;
+				selectedPoint = 1;
+			}
+			context.fill();
+			context.beginPath();
+			context.arc(pts[2][0]+pts[0][0],pts[2][1]+pts[0][1],3,0,Math.PI*2);
+			if (pX && pY && context.isPointInPath(pX,pY)) {
+				selectedTriangle = i;
+				selectedPoint = 2;
+			}
+			context.fill();
+			context.closePath();
+			//if (pX && pY )
+		}
+	}
+	c.mousedown(function(e) {
+		var pos = c.offset(),
+			pX = e.clientX - pos.left,
+			pY = e.clientY - pos.top;
+		draw(pX,pY);
+		if (selectedTriangle !== null) canMove = true;
+		c.mousemove(mousemove);
+	});
+	function mousemove(e) {
+		var pos = c.offset(),
+			pX = e.clientX - pos.left,
+			pY = e.clientY - pos.top;
+		if (canMove && selectedTriangle !== null) {
+			if (selectedPoint === null) {
+				triangles[selectedTriangle][0][0] = pX - offset[0];
+				triangles[selectedTriangle][0][1] = pY - offset[1];
+			} else {
+				triangles[selectedTriangle][selectedPoint][0] = pX-triangles[selectedTriangle][0][0];
+				triangles[selectedTriangle][selectedPoint][1] = pY-triangles[selectedTriangle][0][1];
+			}
+		}
+	}
+	c.mouseup(function() { canMove = false });
+	c.mouseleave(function() { canMove = false } );
+	function leave(e) {
+		selectedTriangle = null;
+		c.mousemove(null);
+	};
+}
+
 
 /* fractal drawing */
 
