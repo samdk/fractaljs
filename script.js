@@ -170,10 +170,14 @@ function refresh(triangles,quality) {
 		drawFractal(e.data);
 	}
 	console.log("starting worker");
-	worker.postMessage(triangles,quality,canvas.width,canvas.height);
+	worker.postMessage([triangles,quality,canvas.width,canvas.height]);
 	console.log("started worker");
 
 	function drawFractal(grid) {
+		var canvas = document.getElementById('c'),
+			ctx = canvas.getContext('2d'),
+			canvasData = ctx.createImageData(canvas.width, canvas.height),
+			cd = canvasData.data;
 		var freqMax = -1;
 		for (var x = 0; x < grid.length; x++) {
 			for (var y = 0; y < grid[x].length; y++) {
@@ -188,16 +192,16 @@ function refresh(triangles,quality) {
 					var idx = (x + y*canvas.width) * 4,
 						color = mapping(pt[1]);
 					if (n > 20 && pt[0] >= 0) {
-						cd[idx] = color[0];
-						cd[idx+1] = color[1];
-						cd[idx+2] = color[2];
+						cd[idx] = 255;//color[0];
+						cd[idx+1] = 0;//color[1];
+						cd[idx+2] = 0;//color[2];
 						cd[idx+3] = 255 * (Math.log(freq) / Math.log(freqMax));
 					}
 				}
 			}
 		}
 		ctx.putImageData(canvasData,0,0);
+		drawColors();
 	}
-	drawColors();
 	return false;
 }
