@@ -1,20 +1,17 @@
 $(function() {
-	$("#button").live("click",refresh);
+	refresh();
 	render();
 });
 
 
 /* dragging */
+var triangles = [[[150,150],[0,75],[-75,0]],
+			 [[187.5,225],[-37.5,0],[0,-37.5]]];
 
 function render() {
 	var c = $('#c3'),
 		cvs = document.getElementById('c3'),
 		context = cvs.getContext('2d'),
-		triangles = [[[10,10],[50,0],[0,50]],
-					 [[40,40],[30,20],[40,70]],
-					 [[100,100],[50,50],[50,0]],
-					 [[150,10],[10,50],[50,0]],
-					 [[10,150],[50,0],[0,60]]],
 		colors = [["f00","f88"],["0f0","8f8"],["66f","aaf"],["ff0","ff8"],["0ff","8ff"]],
 		selectedTriangle = null,
 		selectedPoint = null,
@@ -25,8 +22,9 @@ function render() {
 	setInterval(draw,5);
 	function draw(pX,pY) {
 		context.clearRect(0,0,300,300);
-		context.fillStyle = "#ccc";
 		for (var n = 0; n < 5; n++) {
+			if (n == 2) context.fillStyle = '#aaa';
+			else context.fillStyle = '#ddd';
 			context.fillRect((cvs.width-1) / 4 * n,0,1,cvs.height);
 			context.fillRect(0,(cvs.height-1) / 4 * n,cvs.width,1);
 		}
@@ -61,6 +59,8 @@ function render() {
 				selectedPoint = 1;
 			}
 			context.fill();
+			context.closePath();
+			context.fillStyle = '#00f';
 			context.beginPath();
 			context.arc(pts[2][0]+pts[0][0],pts[2][1]+pts[0][1],3,0,Math.PI*2);
 			if (pX && pY && context.isPointInPath(pX,pY)) {
@@ -69,7 +69,6 @@ function render() {
 			}
 			context.fill();
 			context.closePath();
-			//if (pX && pY )
 		}
 	}
 	c.mousedown(function(e) {
@@ -94,7 +93,7 @@ function render() {
 			}
 		}
 	}
-	c.mouseup(function() { canMove = false });
+	c.mouseup(function() { canMove = false; refresh(); });
 	c.mouseleave(function() { canMove = false } );
 	function leave(e) {
 		selectedTriangle = null;
@@ -132,21 +131,23 @@ function drawColors() {
 		ctx.fillRect(i,0,1,10);
 	}
 }
-
 function refresh() {
 	var canvas = document.getElementById('c'),
 		ctx = canvas.getContext('2d'),
 		canvasData = ctx.createImageData(canvas.width, canvas.height),
 		cd = canvasData.data;
 
-	function r(x,y) {
-		return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
-	}
-	function theta(x,y) {
-		return Math.atan(x/y);
-	}
-	function phi(x,y) {
-		return Math.atan(y/x);
+	function funcsFromTriangles(ts) {
+		function scale(n) {	return (n) / 75; }
+		var funcs = [];
+		for (var i = 0; i < ts.length; i++) {
+			var t = ts[i];
+			funcs.push(function(x,y,t) {
+				return [scale(t[0][0]-150) + scale(t[1][0])*x + scale(t[2][0])*y,
+						scale(t[0][1]-150) + scale(t[1][1])*x + scale(t[2][1])*y];
+			});
+		}
+		return funcs;
 	}
 
 	function draw() {
@@ -156,13 +157,15 @@ function refresh() {
 			sierpFuncs = [ function(x,y) { return [x/2,y/2] },
 					  function(x,y) { return [(x+1)/2,y/2] },
 					  function(x,y) { return [x/2,(y+1)/2] }]
-			funcs2 = [ function(x,y) { return [-0.83*y,0.83*x] },
+			funcs2 = [ function(x,y) { return [-1*y,x] },
 					  function(x,y) { return [(-0.5*x)+0.5,(-0.5*y)+1] } ]
-			funcs = [ function(x,y) { return [.7*x - .85*y + .25, .3*x + .66*y - .44] },
-					  function(x,y) { return [-.3*x + .7*y - .31, -.67*x + .14*y + .13] } ]
+			funcs3 = [ function(x,y) { return [.7*x - .85*y + .25, .3*x + .66*y - .44] },
+					  function(x,y) { return [-.3*x + .7*y - .31, -.67*x + .14*y + .13] } ],
+			funcs = funcsFromTriangles(triangles),
 			fColors = [0,0.5,0.99],
 			grid = [],
-			quality = 2;
+			quality = 10;
+		fs = funcsFromTriangles(triangles);
 
 		for (var xR = 0; xR < canvas.width; xR++) {
 			grid[xR] = [];
@@ -173,9 +176,9 @@ function refresh() {
 
 		for (var n = 0; n < canvas.width * canvas.height * quality; n++) {
 			var i = Math.floor(Math.random()*funcs.length),
-				v = funcs[i](x,y), x = v[0], y = v[1],
-				xR = Math.floor((x+1)/2*200)+100,
-				yR = Math.floor((y+1)/2*200)+100;
+				v = funcs[i](x,y,triangles[i]), x = v[0], y = v[1],
+				xR = Math.floor((x+1)/2*130)+10,
+				yR = Math.floor((y+1)/2*130)+10;
 			if (xR > 0 && xR < canvas.width && yR > 0 && yR < canvas.height) { 
 				var	c = (c+fColors[i])/2,
 					pta = grid[xR],

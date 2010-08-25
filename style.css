@@ -7,8 +7,8 @@ canvas {
 #c3 {
 }
 #c {
-	margin-top: 100px;
-	padding: 10px;
+	border: 1px solid #ddd;
+	background: black;
 }
 a {
 	display: block;
