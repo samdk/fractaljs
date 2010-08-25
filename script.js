@@ -163,15 +163,11 @@ function refresh(triangles,quality) {
 		canvasData = ctx.createImageData(canvas.width, canvas.height),
 		cd = canvasData.data;
 
-	console.log("making worker");
 	var worker = new Worker('worker.js');
 	worker.onmessage = function(e) {
-		console.log("received worker message");
 		drawFractal(e.data);
 	}
-	console.log("starting worker");
-	worker.postMessage(triangles,quality,canvas.width,canvas.height);
-	console.log("started worker");
+	worker.postMessage([triangles,quality,canvas.width,canvas.height]);
 
 	function drawFractal(grid) {
 		var freqMax = -1;
@@ -187,7 +183,7 @@ function refresh(triangles,quality) {
 				if (freq > 0) {
 					var idx = (x + y*canvas.width) * 4,
 						color = mapping(pt[1]);
-					if (n > 20 && pt[0] >= 0) {
+					if (pt[0] >= 0) {
 						cd[idx] = color[0];
 						cd[idx+1] = color[1];
 						cd[idx+2] = color[2];

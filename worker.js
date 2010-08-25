@@ -3,8 +3,8 @@ onmessage = function(e) {
 		quality = e.data[1],
 		width = e.data[2],
 		height = e.data[3];
-	//var results = renderFractal(triangles,quality,width,height);
-	postMessage("yay");
+	var results = renderFractal(triangles,quality,width,height);
+	postMessage(results);
 }
 
 function renderFractal(triangles,quality,width,height) {
