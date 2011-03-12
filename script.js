@@ -162,30 +162,31 @@ function refresh(triangles,quality) {
 	var canvas = document.getElementById('c');
 
 	function renderFractal(triangles,quality) {
+		// get canvas stuff for ease of reference later
 		var canvas = document.getElementById('c'),
 			ctx = canvas.getContext('2d'),
 			canvasData = ctx.createImageData(canvas.width, canvas.height),
 			cd = canvasData.data,
 			width = canvas.width, height = canvas.height;
+		// start out at a random x and y coord, and with a random color (from 0 to 1)
 		var x = Math.random()*2-1,
 			y = Math.random()*2-1,
 			c = Math.random(),
-			sierpFuncs = [ function(x,y) { return [x/2,y/2] },
-					  function(x,y) { return [(x+1)/2,y/2] },
-					  function(x,y) { return [x/2,(y+1)/2] }]
-			funcs2 = [ function(x,y) { return [-1*y,x] },
-					  function(x,y) { return [(-0.5*x)+0.5,(-0.5*y)+1] } ]
-			funcs3 = [ function(x,y) { return [.7*x - .85*y + .25, .3*x + .66*y - .44] },
-					  function(x,y) { return [-.3*x + .7*y - .31, -.67*x + .14*y + .13] } ],
+			// the 'starting' color for each function
 			fColors = [0,0.5,0.99],
+			// the grid of points. we don't draw onto the canvas directly because we draw
+			// colors based on the frequency a point is hit.
 			grid = [];
-			
+		
+		// extracts the functions from the triangles
+		// (I apologize to anyone attemping to read this. it's disgusting.)
 		function func(x,y,t) {
 			function scale(n) {	return (n) / 75; }
 			return [scale(t[0][0]-150) + scale(t[1][0])*x + scale(t[2][0])*y,
 					scale(t[0][1]-150) + scale(t[1][1])*x + scale(t[2][1])*y];
 		};
 
+		// sets up the grid
 		for (var xR = 0; xR < width; xR++) {
 			grid[xR] = [];
 			for (var yR = 0; yR < height; yR++) {
@@ -193,6 +194,7 @@ function refresh(triangles,quality) {
 			}
 		}
 
+		// does the actual data generation for the fractal
 		for (var n = 0; n < width * height * quality; n++) {
 			var i = Math.floor(Math.random()*triangles.length),
 				v = func(x,y,triangles[i]), x = v[0], y = v[1],
@@ -208,12 +210,15 @@ function refresh(triangles,quality) {
 				}
 			}
 		}
+		// finds the max frequency in the grid so that we can scale the colors based on it
 		var freqMax = -1;
 		for (var x = 0; x < grid.length; x++) {
 			for (var y = 0; y < grid[x].length; y++) {
 				if (grid[x][y][0] > freqMax) freqMax = grid[x][y][0];
 			}
 		}
+		// calculates the correct color density based on the frequency, and draws
+		// the fractal
 		for (var x = 0; x < canvas.width; x++) {
 			for (var y = 0; y < canvas.height; y++) {
 				var pt = grid[x][y],
